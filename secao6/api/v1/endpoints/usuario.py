@@ -1,11 +1,13 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response
+from fastapi.responses import JSONResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.exc import IntegrityError
 
-from models.usuario_model import UsuarioBase  # Corrigindo a importação
+from models.usuario_model import UsuarioBase  
 
 from core.deps import get_session, get_current_user
 from core.security import gerar_hash_senha

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from core.database import get_session
 from core.auth import oauth2_schema
 from core.configs import settings
-from models.usuario_model import UsuarioBase  # Corrigido o nome da classe importada
+from models.usuario_model import UsuarioBase  
 
 class TokenData(BaseModel):
     username: Optional[str] = None
@@ -26,7 +26,7 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
         
 
 async def get_current_user(token: str = Depends(oauth2_schema),
-                           db: AsyncSession = Depends(get_session)) -> UsuarioBase:  # Corrigido o tipo de retorno
+                           db: AsyncSession = Depends(get_session)) -> UsuarioBase:  
     """
     Função assíncrona para obter o usuário atual com base no token JWT fornecido.
     Verifica se o token é válido e decodifica seu payload para obter o identificador do usuário.

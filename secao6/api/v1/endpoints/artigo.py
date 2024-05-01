@@ -12,7 +12,7 @@ from core.deps import get_current_user
 from core.database import get_session
 
 from schemas.artigo_schema import ArtigoSchema
-
+from models.artigo_model import ArtigoCreate, ArtigoBase, Artigo
 
 router = APIRouter()
 
@@ -20,23 +20,23 @@ router = APIRouter()
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=ArtigoSchema)
 async def post_artigo(artigo: ArtigoSchema, usuario_logado: UsuarioBase = Depends(get_current_user),
                       db: AsyncSession = Depends(get_session)):
-    novo_artigo: ArtigoModel = ArtigoModel(titulo=artigo.titulo,
+    novo_artigo: ArtigoCreate = ArtigoCreate(titulo=artigo.titulo,
                                            descricao=artigo.descricao,
                                            url_fonte=artigo.url_fonte,
                                            usuario_id=usuario_logado.id
                                            )
     db.add(novo_artigo)
     await db.commit()
-
+    
     return novo_artigo
 
 # GET Artigos
 @router.get('/', response_model=List[ArtigoSchema])
 async def get_artigos(db: AsyncSession = Depends(get_session)):
     async with db as session:
-        query = select(ArtigoModel)
+        query = select(Artigo)
         result = await session.execute(query)
-        artigos: List[ArtigoModel] = result.scalars().unique().all()
+        artigos: List[Artigo] = result.scalars().unique().all()
 
         return artigos
 
@@ -44,9 +44,9 @@ async def get_artigos(db: AsyncSession = Depends(get_session)):
 @router.get('/{artigo_id}', response_model=ArtigoSchema, status_code=status.HTTP_200_OK)
 async def get_artigo(artigo_id: int, db: AsyncSession = Depends(get_session)):
     async with db as session:
-        query = select(ArtigoModel).filter(ArtigoModel.id == artigo_id)
+        query = select(Artigo).filter(Artigo.id == artigo_id)
         result = await session.execute(query)
-        artigo: ArtigoModel = result.scalar().unique().one_or_none()
+        artigo: Artigo = result.scalar().unique().one_or_none()
 
         if artigo:
             return artigo
@@ -58,9 +58,9 @@ async def get_artigo(artigo_id: int, db: AsyncSession = Depends(get_session)):
 async def put_artigo(artigo_id: int, artigo: ArtigoSchema, db: AsyncSession = Depends(get_session),
                      usuario_logado: UsuarioBase = Depends(get_current_user)):
     async with db as session:
-        query = select(ArtigoModel).filter(ArtigoModel.id == artigo_id)
+        query = select(Artigo).filter(Artigo.id == artigo_id)
         result = await session.execute(query)
-        artigo_up: ArtigoModel = result.scalar().unique().one_or_none()
+        artigo_up: Artigo = result.scalar().unique().one_or_none()
 
         if artigo_up:
             if artigo.titulo:
@@ -83,9 +83,9 @@ async def put_artigo(artigo_id: int, artigo: ArtigoSchema, db: AsyncSession = De
 async def delete_artigo(artigo_id: int, db: AsyncSession = Depends(get_session),
                      usuario_logado: UsuarioBase = Depends(get_current_user)):
     async with db as session:
-        query = select(ArtigoModel).filter(ArtigoModel.id == artigo_id)
+        query = select(Artigo).filter(Artigo.id == artigo_id)
         result = await session.execute(query)
-        artigo_del: ArtigoModel = result.scalar().unique().one_or_none()
+        artigo_del: Artigo = result.scalar().unique().one_or_none()
 
         if artigo_del:
             await session.delete(artigo_del)
