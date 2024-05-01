@@ -1,28 +1,10 @@
-# from sqlalchemy.orm import sessionmaker
-# from sqlalchemy.ext.asyncio import create_async_engine
-# from sqlalchemy.ext.asyncio import AsyncEngine
-# from sqlalchemy.ext.asyncio import AsyncSession
-
-# from core.configs import settings
-
-# engine: AsyncEngine = create_async_engine(settings.DB_URL)
-
-# Session: AsyncSession = sessionmaker(
-#     autocommit=False,
-#     autoflush=False,
-#     expire_on_commit=False,
-#     class_=AsyncSession,
-#     bind=engine
-# )
-
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 
 from core.configs import settings
 
-engine = create_async_engine(settings.DB_URL)
-
-# Crie o engine assíncrono
+# Crie o engine assíncrono com echo=True para mostrar instruções SQL geradas
 engine = create_async_engine(settings.DB_URL, echo=True)
 
 # Use async_sessionmaker para criar a fábrica de sessões assíncronas
@@ -33,10 +15,15 @@ Session = sessionmaker(
     autoflush=False)
 
 def get_session() -> AsyncSession:
-    return Session()
+    """
+    Função para obter uma sessão do banco de dados.
+    Retorna uma instância de AsyncSession.
+    """
+    try:
+        return Session()
+    except SQLAlchemyError as e:
+        # Tratamento de erro caso a conexão com o banco de dados falhe
+        print(f"Erro ao conectar ao banco de dados: {e}")
+        raise
 
-__all__ = ["engine", "Session"]
-
-
-
-
+__all__ = ["engine", "Session", "get_session"]
